@@ -1,5 +1,4 @@
 import socket
-import time
 
 
 class Connection:
@@ -26,5 +25,6 @@ class Connection:
         self.buffer = self.buffer[self.buffer.find('\n') + 1:]
         split_data_line = data_line.split(',')
         if (len(split_data_line) != self.length_expected):
+            print(f"expected range {self.length_expected} got {len(split_data_line)}")
             return [0.0 for _ in range(self.length_expected)]
         return [float(data.strip()) for data in split_data_line]

@@ -2,19 +2,34 @@
 #include <WiFiClient.h>
 #include <WiFiAP.h>
 
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+
 const char *ssid = "SlotMeasurements";
-const char *password = "4data&speed"; // Change this to a secure password
+const char *password = "4data&speed";
+
 
 WiFiServer server(8888);
+Adafruit_BNO055 bno = Adafruit_BNO055(55);
+sensors_event_t event;
 
 void setup() {
   Serial.begin(115200);
   
-
-  // Connect to WiFi network
   WiFi.softAP(ssid, password);
 
+  if(!bno.begin())
+  {
+    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while(1);
+  }
+  
   delay(1000);
+      
+  bno.setExtCrystalUse(true);
+
   Serial.println("ESP32-P2P Server");
   Serial.print("IP Address: ");
   Serial.println(WiFi.softAPIP());
@@ -31,11 +46,13 @@ void loop() {
     while (client.connected()) {
       if (client.available()) {
         String data = client.readStringUntil('\n');
-        client.println("1, 2, 3");
+        bno.getEvent(&event);
+        client.println(String(millis()) + "," + String(event.orientation.x) + "," + String(event.orientation.y) + "," + String(event.orientation.z));
       }
     }
 
     Serial.println("Client disconnected");
     client.stop();
   }
+  delay(50);
 }
