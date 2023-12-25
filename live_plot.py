@@ -8,21 +8,17 @@ import pandas as pd
 assert len(sys.argv) == 3, f'2 parameters, file name and interval, needed ({len(sys.argv) - 1} parameters given)'
 
 STEPS_SHOWN = 200
-length_csv_file = 0
 
 plt.style.use('fivethirtyeight')
 plt.tight_layout()
 
 
 def animate(i):
-    global length_csv_file
-    to_skip_rows = length_csv_file - STEPS_SHOWN if length_csv_file - STEPS_SHOWN >= 0 else 0
-    data = pd.read_csv(sys.argv[1], skiprows=lambda x: x < to_skip_rows and x != 0)
+    data = pd.read_csv(sys.argv[1])
 
     plt.cla()
 
     x_axis_column = data.columns[0]
-    length_csv_file = len(data[x_axis_column])
     data.iloc[-STEPS_SHOWN:]
     for column in data.columns[1:]:
         plt.plot(data[x_axis_column], data[column], label=column, linewidth=2)
