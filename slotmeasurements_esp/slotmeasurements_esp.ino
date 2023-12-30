@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include <WiFiClient.h>
 #include <WiFiAP.h>
 
 #include <Wire.h>
@@ -9,11 +8,15 @@
 
 const char *ssid = "SlotMeasurements";
 const char *password = "4data&speed";
+const char *ip = "192.168.4.2";
+const int port = 8888;
+const int localPort = 8080;
 
-
-WiFiServer server(8888);
+WiFiUDP udp;
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
+
 sensors_event_t event;
+
 
 void setup() {
   Serial.begin(115200);
@@ -30,33 +33,13 @@ void setup() {
       
   bno.setExtCrystalUse(true);
 
-  Serial.println("ESP32-P2P Server");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.softAPIP());
-
-  server.begin();
+  udp.begin(localPort);
 }
 
 void loop() {
-  WiFiClient client = server.available();
-
-  if (client) {
-    Serial.println("New client connected");
-    unsigned int start = millis();
-    while (client.connected()) {
-      bno.getEvent(&event);
-      if (client.available()) {
-        String data = client.readStringUntil('\n');
-        client.println(String(millis()) + "," + String(event.orientation.x) + "," + String(event.orientation.y) + "," + String(event.orientation.z));
-      }
-      delay(10);
-      Serial.println(String(millis() - start));
-      start = millis();
-    }
-    
-
-    Serial.println("Client disconnected");
-    client.stop();
-  }
-  delay(100);
+  bno.getEvent(&event);
+  udp.beginPacket(ip, port);
+  udp.print(String(millis()) + "," + String(event.orientation.x) + "," + String(event.orientation.y) + "," + String(event.orientation.z));
+  udp.endPacket();
+  delay(10);
 }
