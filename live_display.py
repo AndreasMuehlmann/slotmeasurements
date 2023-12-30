@@ -88,9 +88,15 @@ def loop(value):
     global last_length_read
     data = pd.read_csv(sys.argv[1])
     pandas_euler = data.iloc[len(data) - 1][1:4]
-    euler[0] = pandas_euler.iloc[1]
-    euler[1] = -pandas_euler.iloc[2]
-    euler[2] = pandas_euler.iloc[0]
+
+    euler[0] = -pandas_euler.iloc[1]
+    euler[1] = pandas_euler.iloc[0]
+    euler[2] = pandas_euler.iloc[2]
+
+    #euler[0] = pandas_euler.iloc[1]
+    #euler[1] = -pandas_euler.iloc[2]
+    #euler[2] = pandas_euler.iloc[0]
+
     glutPostRedisplay()
     glutTimerFunc(16, loop, 0)
 
