@@ -42,17 +42,21 @@ void loop() {
 
   if (client) {
     Serial.println("New client connected");
-
+    unsigned int start = millis();
     while (client.connected()) {
+      bno.getEvent(&event);
       if (client.available()) {
         String data = client.readStringUntil('\n');
-        bno.getEvent(&event);
         client.println(String(millis()) + "," + String(event.orientation.x) + "," + String(event.orientation.y) + "," + String(event.orientation.z));
       }
+      delay(10);
+      Serial.println(String(millis() - start));
+      start = millis();
     }
+    
 
     Serial.println("Client disconnected");
     client.stop();
   }
-  delay(50);
+  delay(100);
 }

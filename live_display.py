@@ -26,8 +26,7 @@ def draw():
 
 def loop(value):
     global last_length_read
-    data = pd.read_csv(sys.argv[1], skiprows=lambda x: x < last_length_read)
-    last_length_read = len(data)
+    data = pd.read_csv(sys.argv[1])
     pandas_euler = data.iloc[len(data) - 1][1:4]
     euler[0] = -pandas_euler.iloc[2]
     euler[1] = pandas_euler.iloc[0]

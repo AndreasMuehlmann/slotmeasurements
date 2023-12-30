@@ -1,4 +1,5 @@
 import socket
+import time
 
 
 class Connection:
@@ -16,15 +17,16 @@ class Connection:
 
     def get_measurements(self):
         self.socket.sendall(b"y\n")
-        data = self.socket.recv(1024).decode('utf-8')
-        self.buffer += data
-        new_line_index = self.buffer.find("\n")
-        if (new_line_index == -1):
-            return [0.0 for _ in range(self.length_expected)]
+        start = time.time()
+        while self.buffer.find("\n") == -1:
+            data = ""
+            while not data:
+                data = self.socket.recv(128).decode('utf-8')
+            self.buffer += data
+        print(f'{time.time() - start}, {len(self.buffer)}')
         data_line = self.buffer[:self.buffer.find("\n")]
         self.buffer = self.buffer[self.buffer.find('\n') + 1:]
         split_data_line = data_line.split(',')
         if (len(split_data_line) != self.length_expected):
-            print(f"expected range {self.length_expected} got {len(split_data_line)}")
-            return [0.0 for _ in range(self.length_expected)]
+            raise Exception(f"expected range {self.length_expected} got {len(split_data_line)}")
         return [float(data.strip()) for data in split_data_line]
